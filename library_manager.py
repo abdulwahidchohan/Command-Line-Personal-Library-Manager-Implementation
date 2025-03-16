@@ -1,169 +1,190 @@
 import json
-import os
-from tabulate import tabulate
+import csv
 
-LIBRARY_FILE = "library.txt"
-BACKUP_FILE = "library_backup.txt"
-
+# Load library from a text file (JSON format)
 def load_library():
-    if not os.path.exists(LIBRARY_FILE):
-        return []
     try:
-        with open(LIBRARY_FILE, 'r', encoding='utf-8') as f:
+        with open('library.txt', 'r', encoding='utf-8') as f:
             return json.load(f)
+    except FileNotFoundError:
+        return []
     except Exception as e:
-        print(f"Error loading library: {e}")
+        print(f"❌ Error loading library: {e}")
         return []
 
+# Save library back to the text file
 def save_library(library):
     try:
-        with open(BACKUP_FILE, 'w', encoding='utf-8') as backup_f:
-            json.dump(library, backup_f)  # Create a backup before saving
-        with open(LIBRARY_FILE, 'w', encoding='utf-8') as f:
+        with open('library.txt', 'w', encoding='utf-8') as f:
             json.dump(library, f, indent=4)
     except Exception as e:
-        print(f"Error saving library: {e}")
+        print(f"❌ Error saving library: {e}")
 
+# Import books from a CSV file
+def import_library_from_csv(library):
+    filename = input("Enter CSV filename to import (e.g., library_sample.csv): ").strip()
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                library.append({
+                    'title': row['title'],
+                    'author': row['author'],
+                    'publication_year': int(row['publication_year']),
+                    'genre': row['genre'],
+                    'read_status': row['read_status'].lower() == 'yes',
+                    'rating': float(row['rating'])
+                })
+        print(f"✅ Library imported successfully from {filename}!")
+    except Exception as e:
+        print(f"❌ Error importing CSV file: {e}")
+
+# Export books to a CSV file
+def export_library_to_csv(library):
+    filename = input("Enter CSV filename to export (e.g., export_library.csv): ").strip()
+    try:
+        with open(filename, 'w', encoding='utf-8', newline='') as f:
+            fieldnames = ['title', 'author', 'publication_year', 'genre', 'read_status', 'rating']
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for book in library:
+                writer.writerow({
+                    'title': book['title'],
+                    'author': book['author'],
+                    'publication_year': book['publication_year'],
+                    'genre': book['genre'],
+                    'read_status': 'yes' if book['read_status'] else 'no',
+                    'rating': book.get('rating', 'N/A')
+                })
+        print(f"✅ Library exported successfully to {filename}!")
+    except Exception as e:
+        print(f"❌ Error exporting CSV file: {e}")
+
+# Print menu options
 def print_menu():
-    print("\nWelcome to your Personal Library Manager!")
-    print(tabulate([
-        ["1", "Add a book"],
-        ["2", "Remove a book"],
-        ["3", "Search for a book"],
-        ["4", "Display all books"],
-        ["5", "Sort books"],
-        ["6", "Display statistics"],
-        ["7", "Export library"],
-        ["8", "Import library"],
-        ["9", "Exit"]
-    ], headers=["Option", "Action"], tablefmt="grid"))
+    print("""
+Welcome to your Personal Library Manager!
+1. Add a book
+2. Remove a book
+3. Search for a book
+4. Display all books
+5. Display statistics
+6. Import books from CSV
+7. Export books to CSV
+8. Exit
+    """.strip())
 
+# Add a new book
 def add_book(library):
     title = input("Enter the book title: ").strip()
     author = input("Enter the author: ").strip()
     
     while True:
+        year_str = input("Enter the publication year: ").strip()
         try:
-            year = int(input("Enter the publication year: ").strip())
+            year = int(year_str)
             break
         except ValueError:
-            print("Invalid year. Please enter a valid integer.")
-
+            print("❌ Invalid year. Please enter a valid integer.")
+    
     genre = input("Enter the genre: ").strip()
     
     read_status = None
     while read_status not in ['yes', 'no']:
         read_status = input("Have you read this book? (yes/no): ").strip().lower()
-
+        if read_status not in ['yes', 'no']:
+            print("❌ Please enter 'yes' or 'no'.")
+    
     while True:
+        rating_str = input("Enter book rating (1-5, or leave blank): ").strip()
+        if rating_str == "":
+            rating = None
+            break
         try:
-            rating = float(input("Rate the book (1-5 stars): ").strip())
+            rating = float(rating_str)
             if 1 <= rating <= 5:
                 break
             else:
-                print("Rating must be between 1 and 5.")
+                print("❌ Please enter a rating between 1 and 5.")
         except ValueError:
-            print("Invalid input. Please enter a number between 1 and 5.")
-
+            print("❌ Invalid rating. Please enter a number between 1 and 5.")
+    
     book = {
         'title': title,
         'author': author,
         'publication_year': year,
         'genre': genre,
         'read_status': (read_status == 'yes'),
-        'rating': rating
+        'rating': rating if rating is not None else "N/A"
     }
     library.append(book)
     print("✅ Book added successfully!")
 
+# Remove a book
 def remove_book(library):
-    title = input("Enter the title of the book to remove: ").strip().lower()
-    original_len = len(library)
-    library[:] = [book for book in library if book['title'].lower() != title]
-    
-    if len(library) < original_len:
+    title = input("Enter the title of the book to remove: ").strip()
+    removed = False
+    for i in range(len(library)-1, -1, -1):
+        if library[i]['title'].lower() == title.lower():
+            del library[i]
+            removed = True
+    if removed:
         print("✅ Book removed successfully!")
     else:
         print("❌ Book not found in the library.")
 
+# Search books
 def search_books(library):
-    query = input("Enter a title or author to search: ").strip().lower()
-    results = [book for book in library if query in book['title'].lower() or query in book['author'].lower()]
-    
-    if results:
-        print("\n🔍 Matching Books:")
-        display_books(results)
-    else:
-        print("❌ No matching books found.")
-
-def display_books(library):
-    if not library:
-        print("📚 Your library is empty.")
-        return
-
-    table = [[book['title'], book['author'], book['publication_year'], book['genre'], 'Read' if book['read_status'] else 'Unread', f"{book['rating']} ⭐"] for book in library]
-    print(tabulate(table, headers=["Title", "Author", "Year", "Genre", "Status", "Rating"], tablefmt="fancy_grid"))
-
-def sort_books(library):
-    print("\nSort by:")
-    print("1. Title (A-Z)")
-    print("2. Author (A-Z)")
-    print("3. Year (Newest First)")
+    print("Search by:")
+    print("1. Title")
+    print("2. Author")
     choice = input("Enter your choice: ").strip()
-
+    
     if choice == '1':
-        library.sort(key=lambda x: x['title'].lower())
+        search_term = input("Enter the title: ").strip()
+        matching = [book for book in library if book['title'].lower() == search_term.lower()]
     elif choice == '2':
-        library.sort(key=lambda x: x['author'].lower())
-    elif choice == '3':
-        library.sort(key=lambda x: x['publication_year'], reverse=True)
+        search_term = input("Enter the author: ").strip()
+        matching = [book for book in library if book['author'].lower() == search_term.lower()]
     else:
         print("❌ Invalid choice.")
         return
-
-    print("✅ Books sorted successfully!")
-    display_books(library)
-
-def display_statistics(library):
-    total_books = len(library)
-    if total_books == 0:
-        print("📚 No books in the library.")
+    
+    if not matching:
+        print("❌ No matching books found.")
         return
+    
+    print("\n📚 Matching Books:")
+    for idx, book in enumerate(matching, 1):
+        read_status = '✅ Read' if book['read_status'] else '❌ Unread'
+        print(f"{idx}. {book['title']} by {book['author']} ({book['publication_year']}) - {book['genre']} - {read_status} - Rating: {book.get('rating', 'N/A')}")
 
-    read_books = sum(1 for book in library if book['read_status'])
-    avg_rating = sum(book['rating'] for book in library) / total_books
+# Display all books
+def display_all_books(library):
+    if not library:
+        print("📖 Your library is empty.")
+        return
+    print("\n📚 Your Library:")
+    for idx, book in enumerate(library, 1):
+        read_status = '✅ Read' if book['read_status'] else '❌ Unread'
+        print(f"{idx}. {book['title']} by {book['author']} ({book['publication_year']}) - {book['genre']} - {read_status} - Rating: {book.get('rating', 'N/A')}")
 
-    print("\n📊 Library Statistics:")
-    print(f"📚 Total Books: {total_books}")
-    print(f"📖 Books Read: {read_books} ({(read_books/total_books)*100:.1f}%)")
-    print(f"⭐ Average Rating: {avg_rating:.1f}/5")
+# Display library statistics
+def display_statistics(library):
+    total = len(library)
+    print(f"\n📊 Total books: {total}")
+    if total == 0:
+        return
+    read_count = sum(1 for book in library if book['read_status'])
+    percentage = (read_count / total) * 100
+    print(f"📖 Percentage read: {percentage:.1f}%")
 
-def export_library(library):
-    filename = input("Enter filename to export (e.g., my_library.json): ").strip()
-    try:
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(library, f, indent=4)
-        print(f"✅ Library exported successfully as {filename}!")
-    except Exception as e:
-        print(f"❌ Error exporting library: {e}")
-
-def import_library(library):
-    filename = input("Enter filename to import (e.g., my_library.json): ").strip()
-    try:
-        with open(filename, 'r', encoding='utf-8') as f:
-            imported_books = json.load(f)
-            library.extend(imported_books)
-        print(f"✅ Library imported successfully from {filename}!")
-    except Exception as e:
-        print(f"❌ Error importing library: {e}")
-
+# Main function
 def main():
     library = load_library()
-    
     while True:
         print_menu()
         choice = input("Enter your choice: ").strip()
-
         if choice == '1':
             add_book(library)
         elif choice == '2':
@@ -171,21 +192,20 @@ def main():
         elif choice == '3':
             search_books(library)
         elif choice == '4':
-            display_books(library)
+            display_all_books(library)
         elif choice == '5':
-            sort_books(library)
-        elif choice == '6':
             display_statistics(library)
+        elif choice == '6':
+            import_library_from_csv(library)
         elif choice == '7':
-            export_library(library)
+            export_library_to_csv(library)
         elif choice == '8':
-            import_library(library)
-        elif choice == '9':
             save_library(library)
-            print("📖 Library saved. Goodbye!")
+            print("📂 Library saved. Goodbye! 👋")
             break
         else:
-            print("❌ Invalid choice. Please enter a number between 1-9.")
+            print("❌ Invalid choice. Please enter a number between 1-8.")
 
+# Run the program
 if __name__ == "__main__":
     main()

@@ -1,0 +1,11 @@
+title,author,publication_year,genre,read_status,rating
+"The Hobbit","J.R.R. Tolkien",1937,"Fantasy",yes,5
+"1984","George Orwell",1949,"Dystopian",yes,4.5
+"To Kill a Mockingbird","Harper Lee",1960,"Classic",yes,5
+"The Catcher in the Rye","J.D. Salinger",1951,"Classic",no,4
+"Brave New World","Aldous Huxley",1932,"Dystopian",yes,4.2
+"The Great Gatsby","F. Scott Fitzgerald",1925,"Classic",no,4.8
+"Moby-Dick","Herman Melville",1851,"Adventure",no,3.9
+"War and Peace","Leo Tolstoy",1869,"Historical Fiction",no,4.6
+"Pride and Prejudice","Jane Austen",1813,"Romance",yes,4.9
+"Crime and Punishment","Fyodor Dostoevsky",1866,"Psychological Fiction",yes,4.7

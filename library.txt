@@ -1,0 +1,82 @@
+[
+    {
+        "title": "The Hobbit",
+        "author": "J.R.R. Tolkien",
+        "publication_year": 1937,
+        "genre": "Fantasy",
+        "read_status": true,
+        "rating": 5.0
+    },
+    {
+        "title": "1984",
+        "author": "George Orwell",
+        "publication_year": 1949,
+        "genre": "Dystopian",
+        "read_status": true,
+        "rating": 4.5
+    },
+    {
+        "title": "To Kill a Mockingbird",
+        "author": "Harper Lee",
+        "publication_year": 1960,
+        "genre": "Classic",
+        "read_status": true,
+        "rating": 5.0
+    },
+    {
+        "title": "The Catcher in the Rye",
+        "author": "J.D. Salinger",
+        "publication_year": 1951,
+        "genre": "Classic",
+        "read_status": false,
+        "rating": 4.0
+    },
+    {
+        "title": "Brave New World",
+        "author": "Aldous Huxley",
+        "publication_year": 1932,
+        "genre": "Dystopian",
+        "read_status": true,
+        "rating": 4.2
+    },
+    {
+        "title": "The Great Gatsby",
+        "author": "F. Scott Fitzgerald",
+        "publication_year": 1925,
+        "genre": "Classic",
+        "read_status": false,
+        "rating": 4.8
+    },
+    {
+        "title": "Moby-Dick",
+        "author": "Herman Melville",
+        "publication_year": 1851,
+        "genre": "Adventure",
+        "read_status": false,
+        "rating": 3.9
+    },
+    {
+        "title": "War and Peace",
+        "author": "Leo Tolstoy",
+        "publication_year": 1869,
+        "genre": "Historical Fiction",
+        "read_status": false,
+        "rating": 4.6
+    },
+    {
+        "title": "Pride and Prejudice",
+        "author": "Jane Austen",
+        "publication_year": 1813,
+        "genre": "Romance",
+        "read_status": true,
+        "rating": 4.9
+    },
+    {
+        "title": "Crime and Punishment",
+        "author": "Fyodor Dostoevsky",
+        "publication_year": 1866,
+        "genre": "Psychological Fiction",
+        "read_status": true,
+        "rating": 4.7
+    }
+]
